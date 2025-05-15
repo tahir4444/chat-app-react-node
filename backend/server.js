@@ -6,6 +6,8 @@ const cors = require('cors');
 const { Server } = require('socket.io');
 const Message = require('./models/Message');
 
+const jwt = require('jsonwebtoken');
+
 const app = express();
 const server = http.createServer(app);
 
@@ -21,6 +23,8 @@ app.get('/api/ping', (req, res) => {
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/messages', require('./routes/messages'));
 
+//const username = JSON.parse(atob(getToken().split('.')[1])).username;
+
 const io = new Server(server, {
   cors: {
     origin: '*',
@@ -32,7 +36,7 @@ const users = {}; // userId -> socketId
 
 io.on('connection', (socket) => {
   console.log('New client connected:', socket.id);
-
+  // console.log('User ID:', userId);
   // Register the user with their userId when they connect
   socket.on('register_user', (userId) => {
     users[userId] = socket.id;

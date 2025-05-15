@@ -13,6 +13,12 @@ function Chat() {
   const username = JSON.parse(atob(getToken().split('.')[1])).username;
 
   useEffect(() => {
+    // Register user after socket connects
+    socket.emit('register_user', username);
+  }, [username]);
+
+  // Fetch messages when the component mounts
+  useEffect(() => {
     fetchMessages();
     socket.on('receive_message', (msg) => {
       setMessages((prev) => [...prev, msg]);
@@ -55,10 +61,15 @@ function Chat() {
         onChange={(e) => setReceiver(e.target.value)}
         placeholder="Receiver username"
       /> */}
-      <select name="username" id="username">
+      <select
+        name="receiver"
+        id="receiver"
+        onChange={(e) => setReceiver(e.target.value)}
+      >
         <option value="">Select User to send Message</option>
         <option value="tahir4444">tahir4444</option>
-        <option value="tahir4445">admin</option>
+        <option value="admin">Admin</option>
+        <option value="moosa">Moosa</option>
       </select>
       <input
         value={message}

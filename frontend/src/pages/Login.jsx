@@ -16,7 +16,11 @@ function Login() {
     try {
       const res = await axios.post('/auth/login', { username, password });
       saveToken(res.data.token);
-      socket.emit('register_user', username); // This tells the server who the socket belongs to
+      //socket.emit('register_user', username); // This tells the server who the socket belongs to
+      socket.on('register_user', (username) => {
+        users[userId] = socket.id;
+        //console.log(`User ${userId} registered with socket ${socket.id}`);
+      });
       navigate('/');
     } catch (err) {
       alert('Login failed');
