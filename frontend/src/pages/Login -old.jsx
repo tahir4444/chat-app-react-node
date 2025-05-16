@@ -1,16 +1,27 @@
 import React, { useState } from 'react';
 import axios from '../utils/api';
-import { useAuth } from '../context/AuthContext';
+import { saveToken } from '../utils/auth';
+import { useNavigate } from 'react-router-dom';
+
+import io from 'socket.io-client';
+
+const socket = io('http://localhost:5000');
 
 function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const { login } = useAuth();
+  const navigate = useNavigate();
 
   const handleLogin = async () => {
     try {
       const res = await axios.post('/auth/login', { username, password });
-      login(res.data.token); // 🔥 use context login
+      saveToken(res.data.token);
+      //socket.emit('register_user', username); // This tells the server who the socket belongs to
+      /* socket.on('register_user', (username) => {
+        users[userId] = socket.id;
+        //console.log(`User ${userId} registered with socket ${socket.id}`);
+      }); */
+      navigate('/');
     } catch (err) {
       alert('Login failed');
     }

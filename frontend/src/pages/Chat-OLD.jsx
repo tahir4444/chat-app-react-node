@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { useAuth } from '../context/AuthContext';
+import { logout, getToken } from '../utils/auth';
 import axios from '../utils/api';
 import io from 'socket.io-client';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom'; // ✅ import useNavigate
 
 const socket = io('http://localhost:5000');
 
@@ -10,16 +10,26 @@ function Chat() {
   const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState('');
   const [receiver, setReceiver] = useState('');
-  const { username, logout, isLoggedIn } = useAuth();
-  const navigate = useNavigate();
+
+  const navigate = useNavigate(); // ✅ hook to redirect
+
+  const token = getToken();
+  const username = token ? JSON.parse(atob(token.split('.')[1])).username : '';
+
+  // Redirect to login if no token
+  useEffect(() => {
+    if (!token) {
+      navigate('/login');
+    }
+  }, [token, navigate]);
+
+  if (!token) {
+    return null; // Don't render until redirect happens
+  }
 
   useEffect(() => {
-    if (!isLoggedIn) {
-      navigate('/login');
-    } else {
-      socket.emit('register_user', username);
-    }
-  }, [isLoggedIn, username, navigate]);
+    socket.emit('register_user', username);
+  }, [username]);
 
   useEffect(() => {
     fetchMessages();
@@ -41,10 +51,15 @@ function Chat() {
     setMessage('');
   };
 
+  const handleLogout = () => {
+    logout(); // clear the token
+    navigate('/login'); // ✅ redirect
+  };
+
   return (
     <div>
       <h2>Welcome {username}</h2>
-      <button onClick={logout}>Logout</button>
+      <button onClick={handleLogout}>Logout</button>
       <div
         style={{
           border: '1px solid gray',
@@ -80,3 +95,4 @@ function Chat() {
 }
 
 export default Chat;
+// This code is a React component for a chat application. It uses socket.io for real-time messaging and axios for API calls. The component fetches messages from the server, allows users to send messages, and handles user authentication with JWT tokens stored in local storage. The useNavigate hook from react-router-dom is used to redirect users to the login page if they are not authenticated.
